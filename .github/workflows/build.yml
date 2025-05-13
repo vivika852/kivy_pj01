@@ -37,21 +37,17 @@ jobs:
         run: |
           docker pull ghcr.io/kivy/buildozer:latest
           docker run --rm \
+            --entrypoint bash \
             -v "${{ github.workspace }}":/home/user/hostcwd \
             -w /home/user/hostcwd \
             ghcr.io/kivy/buildozer:latest \
-            bash -c "\
-              # 1. Point sdkmanager at the Buildozer-managed SDK root
+            -c "\
               export ANDROID_SDK_ROOT=/home/user/.buildozer/android/platform/android-sdk && \
-              # 2. Install the Android SDK components you need:
-              yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} \
-                'platform-tools' \
-                'build-tools;36.0.0' \
-                'platforms;android-30' && \
-              # 3. Accept all SDK licenses non-interactively:
+              yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} 'platform-tools' 'build-tools;36.0.0' 'platforms;android-30' && \
               yes | sdkmanager --sdk_root=${ANDROID_SDK_ROOT} --licenses && \
-              # 4. Finally run Buildozer
               buildozer android debug \
+            "
+
             "
 
       - name: Upload artifacts
