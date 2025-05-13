@@ -15,6 +15,14 @@ jobs:
           mkdir -p .buildozer bin
           chmod -R 777 .buildozer bin
 
+      - name: Pre-seed Android SDK licenses
+        run: |
+          mkdir -p .buildozer/android/platform/android-sdk/licenses
+          printf '%s\n%s\n' \
+            "8933bad161af4178b1185d1a37fbf41ea5269c55" \
+            "d56f5187479451eabf01fb7800f9aaa65e0e3d5d" \
+            > .buildozer/android/platform/android-sdk/licenses/android-sdk-license
+
       - name: Get Date
         id: get-date
         run: echo "date=$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
@@ -36,24 +44,11 @@ jobs:
       - name: Build APK with Docker Buildozer
         run: |
           docker pull ghcr.io/kivy/buildozer:latest
-
           docker run --rm \
-            --entrypoint bash \
             -v "${{ github.workspace }}":/home/user/hostcwd \
             -w /home/user/hostcwd \
             ghcr.io/kivy/buildozer:latest \
-            -c " \
-              export ANDROID_SDK_ROOT=/home/user/.buildozer/android/platform/android-sdk && \
-              mkdir -p \$ANDROID_SDK_ROOT/cmdline-tools && \
-              cd \$ANDROID_SDK_ROOT/cmdline-tools && \
-              wget -q https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip && \
-              unzip -q cmdline-tools.zip && \
-              mv cmdline-tools latest && \
-              export PATH=\$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:\$PATH && \
-              yes | sdkmanager --sdk_root=\$ANDROID_SDK_ROOT 'platform-tools' 'build-tools;36.0.0' 'platforms;android-30' && \
-              yes | sdkmanager --sdk_root=\$ANDROID_SDK_ROOT --licenses && \
-              buildozer android debug \
-            "
+            android debug
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
