@@ -29,8 +29,8 @@ jobs:
           restore-keys: |
             buildozer-${{ runner.os }}-${{ steps.get-date.outputs.date }}-
 
-      - name: Pull Buildozer Docker image
-        run: docker pull kivy/buildozer:latest
+      - name: Pull Buildozer Docker image from GHCR
+        run: docker pull ghcr.io/kivy/buildozer:latest
 
       - name: Build APK with Docker Buildozer
         run: |
