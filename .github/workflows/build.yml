@@ -6,10 +6,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get build date
+      - name: Prepare Buildozer cache dir
+        run: |
+          mkdir -p .buildozer
+          chmod 777 .buildozer
+
+      - name: Get Date
         id: get-date
         run: echo "date=$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
 
@@ -18,28 +24,24 @@ jobs:
         with:
           path: .buildozer_global
           key: buildozer-global-${{ runner.os }}-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-global-
+          restore-keys: buildozer-global-
 
       - name: Cache Buildozer workdir
         uses: actions/cache@v3
         with:
           path: .buildozer
           key: buildozer-${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-${{ runner.os }}-${{ steps.get-date.outputs.date }}-
-
-      - name: Pull Buildozer Docker image from GHCR
-        run: docker pull ghcr.io/kivy/buildozer:latest
+          restore-keys: buildozer-${{ runner.os }}-${{ steps.get-date.outputs.date }}-
 
       - name: Build APK with Docker Buildozer
         run: |
-          docker run --rm --user root \
+          docker pull ghcr.io/kivy/buildozer:latest
+          docker run --rm \
             -v "${{ github.workspace }}":/home/user/hostcwd \
             -w /home/user/hostcwd \
             ghcr.io/kivy/buildozer:latest \
             android debug
-            
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
