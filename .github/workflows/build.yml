@@ -10,10 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Prepare Buildozer cache dir
+      - name: Prepare Buildozer cache & bin dirs
         run: |
-          mkdir -p .buildozer
-          chmod 777 .buildozer
+          mkdir -p .buildozer bin
+          chmod -R 777 .buildozer bin
 
       - name: Get Date
         id: get-date
